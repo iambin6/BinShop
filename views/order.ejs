@@ -1,40 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8"><title>Product Orders</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý đơn hàng - Bin Shop</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <h1>Product Orders</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Customer Name</th><th>Product Name</th><th>Quantity</th>
-        <th>Order Date</th><th>Total Price</th><th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% orders.forEach(o => { %>
-        <tr>
-          <td><%= o.customerName %></td>
-          <td><%= o.productName %></td>
-          <td><%= o.quantity %></td>
-          <td><%= o.orderDate.toLocaleDateString('en-US', { timeZone: 'UTC' }) %></td>
-          <td><%= o.totalPrice.toLocaleString('vi-VN') %> VND</td>
-          <td class="actions">
-            <a class="btn btn-blue" href="/orders/update/<%= o._id %>">Update</a>
-            <form action="/orders/delete/<%= o._id %>" method="POST"
-                  onsubmit="return confirm('Delete this order?')">
-              <button class="btn btn-orange">Delete</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-      <% if (!orders.length) { %>
-        <tr><td colspan="6" class="empty">No orders yet.</td></tr>
+  <!-- Header / Navbar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="logo">🛒</span>
+      <h2>Bin Shop Manager</h2>
+    </div>
+    <div class="nav-user">
+      <% if (currentUser) { %>
+        <span class="user-info">
+          Xin chào, <strong><%= currentUser.fullName || currentUser.username %></strong>
+          <span class="badge <%= currentUser.role === 'admin' ? 'badge-admin' : 'badge-user' %>">
+            <%= currentUser.role %>
+          </span>
+        </span>
+        <a href="/logout" class="btn btn-outline-danger btn-sm">Đăng xuất</a>
+      <% } else { %>
+        <a href="/login" class="btn btn-blue btn-sm">Đăng nhập</a>
       <% } %>
-    </tbody>
-  </table>
-  <div class="center"><a class="btn btn-blue btn-lg" href="/orders/create">Create New Order</a></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 4. Thông báo kết quả thao tác (Flash messages) -->
+    <% if (successMessage) { %>
+      <div class="alert alert-success">
+        <span class="alert-icon">✓</span>
+        <span><%= successMessage %></span>
+      </div>
+    <% } %>
+
+    <% if (errorMessage) { %>
+      <div class="alert alert-danger">
+        <span class="alert-icon">⚠</span>
+        <span><%= errorMessage %></span>
+      </div>
+    <% } %>
+
+    <div class="page-title-row">
+      <h1>Danh Sách Đơn Hàng</h1>
+      <a class="btn btn-blue btn-md" href="/orders/create">➕ Tạo Đơn Hàng Mới</a>
+    </div>
+
+    <!-- 3. Thống kê đơn hàng (Statistics Dashboard) -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon bg-blue">📦</div>
+        <div class="stat-content">
+          <div class="stat-title">Tổng số đơn hàng</div>
+          <div class="stat-value"><%= stats.totalOrders.toLocaleString('vi-VN') %></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-green">💰</div>
+        <div class="stat-content">
+          <div class="stat-title">Tổng doanh thu</div>
+          <div class="stat-value"><%= stats.totalRevenue.toLocaleString('vi-VN') %> <small>VND</small></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-orange">📊</div>
+        <div class="stat-content">
+          <div class="stat-title">Tổng sản phẩm đã bán</div>
+          <div class="stat-value"><%= stats.totalProductsSold.toLocaleString('vi-VN') %> <small>món</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 & 2. Tìm kiếm, Lọc và Sắp xếp -->
+    <section class="card filter-card">
+      <form action="/orders" method="GET" class="filter-form">
+        <div class="filter-group">
+          <label for="search">🔍 Tìm kiếm</label>
+          <input 
+            type="text" 
+            id="search" 
+            name="search" 
+            placeholder="Tên khách hàng hoặc sản phẩm..." 
+            value="<%= filters.search || '' %>"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="fromDate">📅 Từ ngày</label>
+          <input 
+            type="date" 
+            id="fromDate" 
+            name="fromDate" 
+            value="<%= filters.fromDate || '' %>"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="toDate">📅 Đến ngày</label>
+          <input 
+            type="date" 
+            id="toDate" 
+            name="toDate" 
+            value="<%= filters.toDate || '' %>"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="sortBy">⇅ Sắp xếp theo</label>
+          <select id="sortBy" name="sortBy">
+            <option value="date-desc" <%= filters.sortBy === 'date-desc' ? 'selected' : '' %>>Ngày đặt: Mới nhất</option>
+            <option value="date-asc" <%= filters.sortBy === 'date-asc' ? 'selected' : '' %>>Ngày đặt: Cũ nhất</option>
+            <option value="price-desc" <%= filters.sortBy === 'price-desc' ? 'selected' : '' %>>Tổng tiền: Cao đến thấp</option>
+            <option value="price-asc" <%= filters.sortBy === 'price-asc' ? 'selected' : '' %>>Tổng tiền: Thấp đến cao</option>
+            <option value="name-asc" <%= filters.sortBy === 'name-asc' ? 'selected' : '' %>>Tên khách: A → Z</option>
+            <option value="name-desc" <%= filters.sortBy === 'name-desc' ? 'selected' : '' %>>Tên khách: Z → A</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-blue">Lọc Dữ Liệu</button>
+          <a href="/orders" class="btn btn-gray">Đặt Lại</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- 5. Responsive và Bảng hiển thị đơn hàng -->
+    <section class="table-responsive">
+      <table class="order-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Khách Hàng</th>
+            <th>Sản Phẩm</th>
+            <th class="text-center">Số Lượng</th>
+            <th>Ngày Đặt Hàng</th>
+            <th class="text-right">Tổng Tiền</th>
+            <th class="text-center">Hành Động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (orders && orders.length > 0) { %>
+            <% orders.forEach((o, index) => { %>
+              <tr>
+                <td><%= (pagination.currentPage - 1) * pagination.limit + index + 1 %></td>
+                <td class="font-bold"><%= o.customerName %></td>
+                <td><span class="product-tag"><%= o.productName %></span></td>
+                <td class="text-center"><%= o.quantity %></td>
+                <td><%= new Date(o.orderDate).toLocaleDateString('vi-VN', { timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit' }) %></td>
+                <td class="text-right text-success font-bold"><%= o.totalPrice.toLocaleString('vi-VN') %> VND</td>
+                <td class="actions-cell">
+                  <a class="btn btn-sm btn-blue" href="/orders/update/<%= o._id %>">Sửa</a>
+                  <!-- 5. Xác nhận xóa chi tiết -->
+                  <form action="/orders/delete/<%= o._id %>" method="POST"
+                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng của khách [<%= o.customerName %>] với sản phẩm [<%= o.productName %>]? Hành động này không thể hoàn tác!')">
+                    <button type="submit" class="btn btn-sm btn-orange">Xóa</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" class="empty-cell">
+                <div class="empty-state">
+                  <p>🔍 Không tìm thấy đơn hàng nào phù hợp với điều kiện tìm kiếm.</p>
+                  <% if (filters.search || filters.fromDate || filters.toDate) { %>
+                    <a href="/orders" class="btn btn-sm btn-blue">Xem tất cả đơn hàng</a>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 2. Phân trang (Pagination) -->
+    <% if (pagination.totalPages > 1) { %>
+      <% 
+        const buildQuery = (page) => {
+          let q = `?page=${page}`;
+          if (filters.search) q += `&search=${encodeURIComponent(filters.search)}`;
+          if (filters.fromDate) q += `&fromDate=${encodeURIComponent(filters.fromDate)}`;
+          if (filters.toDate) q += `&toDate=${encodeURIComponent(filters.toDate)}`;
+          if (filters.sortBy) q += `&sortBy=${encodeURIComponent(filters.sortBy)}`;
+          return q;
+        };
+      %>
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Hiển thị <strong><%= orders.length %></strong> trên tổng số <strong><%= pagination.totalMatching %></strong> đơn hàng phù hợp
+        </div>
+        <ul class="pagination">
+          <!-- Nút Trang trước -->
+          <li class="<%= pagination.currentPage <= 1 ? 'disabled' : '' %>">
+            <a href="<%= pagination.currentPage > 1 ? buildQuery(pagination.currentPage - 1) : '#' %>">« Trước</a>
+          </li>
+
+          <!-- Các nút số trang -->
+          <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+            <li class="<%= p === pagination.currentPage ? 'active' : '' %>">
+              <a href="<%= buildQuery(p) %>"><%= p %></a>
+            </li>
+          <% } %>
+
+          <!-- Nút Trang sau -->
+          <li class="<%= pagination.currentPage >= pagination.totalPages ? 'disabled' : '' %>">
+            <a href="<%= pagination.currentPage < pagination.totalPages ? buildQuery(pagination.currentPage + 1) : '#' %>">Sau »</a>
+          </li>
+        </ul>
+      </div>
+    <% } %>
+  </main>
 </body>
 </html>

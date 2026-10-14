@@ -1,34 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8"><title>Create New Order</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo đơn hàng mới - Bin Shop</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <h1>Create New Order</h1>
-  <form class="card" action="/orders/create" method="POST">
-    <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <!-- Header / Navbar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="logo">🛒</span>
+      <h2>Bin Shop Manager</h2>
+    </div>
+    <div class="nav-user">
+      <% if (currentUser) { %>
+        <span class="user-info">
+          Xin chào, <strong><%= currentUser.fullName || currentUser.username %></strong>
+        </span>
+        <a href="/logout" class="btn btn-outline-danger btn-sm">Đăng xuất</a>
+      <% } %>
+    </div>
+  </header>
 
-    <label>Customer Name</label>
-    <input type="text" name="customerName" placeholder="Enter your name"
-           value="<%= old.customerName || '' %>" required>
+  <main class="container">
+    <div class="form-wrapper">
+      <div class="form-header">
+        <h1>➕ Tạo Đơn Hàng Mới</h1>
+        <p>Nhập thông tin chi tiết đơn hàng khách đặt mua</p>
+      </div>
 
-    <label>Product Name</label>
-    <input type="text" name="productName" list="products" placeholder="Enter product name"
-           value="<%= old.productName || '' %>" required>
-    <datalist id="products">
-      <% products.forEach(p => { %><option value="<%= p.productName %>"><% }) %>
-    </datalist>
+      <% if (error) { %>
+        <div class="alert alert-danger">
+          <span class="alert-icon">⚠</span>
+          <span><%= error %></span>
+        </div>
+      <% } %>
 
-    <label>Quantity</label>
-    <input type="number" name="quantity" min="1" placeholder="Enter quantity"
-           value="<%= old.quantity || '' %>" required>
+      <form class="card form-card" action="/orders/create" method="POST">
+        <div class="form-group">
+          <label for="customerName">Tên Khách Hàng <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="customerName" 
+            name="customerName" 
+            placeholder="Nhập họ và tên khách hàng"
+            value="<%= (old && old.customerName) ? old.customerName : '' %>" 
+            required 
+            autofocus
+          >
+        </div>
 
-    <label>Order Date</label>
-    <input type="date" name="orderDate" value="<%= old.orderDate || '' %>" required>
+        <div class="form-group">
+          <label for="productName">Sản Phẩm <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="productName" 
+            name="productName" 
+            list="products" 
+            placeholder="Gõ hoặc chọn sản phẩm..."
+            value="<%= (old && old.productName) ? old.productName : '' %>" 
+            required
+          >
+          <datalist id="products">
+            <% products.forEach(p => { %>
+              <option value="<%= p.productName %>">
+                <%= p.productName %> - <%= p.unitPrice.toLocaleString('vi-VN') %> VND (<%= p.category %>)
+              </option>
+            <% }) %>
+          </datalist>
+          <small class="form-hint">Gợi ý: Bấm đúp vào ô để xem danh sách sản phẩm có sẵn.</small>
+        </div>
 
-    <button type="submit" class="btn btn-blue btn-block">Place Order</button>
-    <a href="/orders" class="btn btn-orange btn-block">Go Back</a>
-  </form>
+        <div class="form-group">
+          <label for="quantity">Số Lượng Đặt Mua <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="quantity" 
+            name="quantity" 
+            min="1" 
+            placeholder="Nhập số lượng (tối thiểu 1)"
+            value="<%= (old && old.quantity) ? old.quantity : '1' %>" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="orderDate">Ngày Đặt Hàng <span class="required">*</span></label>
+          <input 
+            type="date" 
+            id="orderDate" 
+            name="orderDate" 
+            value="<%= (old && old.orderDate) ? old.orderDate : new Date().toISOString().slice(0, 10) %>" 
+            required
+          >
+        </div>
+
+        <div class="form-btn-group">
+          <button type="submit" class="btn btn-blue btn-lg">Xác Nhận Đặt Hàng</button>
+          <a href="/orders" class="btn btn-gray btn-lg">Quay Lại Danh Sách</a>
+        </div>
+      </form>
+    </div>
+  </main>
 </body>
 </html>
