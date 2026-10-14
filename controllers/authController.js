@@ -112,3 +112,89 @@ exports.logout = (req, res) => {
     res.redirect('/login');
   });
 };
+
+// --- Cài đặt thông tin tài khoản (Profile / Settings) ---
+exports.profileForm = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      req.session.errorMessage = 'Không tìm thấy thông tin tài khoản!';
+      return res.redirect('/login');
+    }
+    res.render('profile', { user });
+  } catch (err) {
+    console.error('Profile form error:', err);
+    res.redirect('/orders');
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      req.session.errorMessage = 'Không tìm thấy thông tin tài khoản!';
+      return res.redirect('/login');
+    }
+
+    const { fullName, email, currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!email) {
+      req.session.errorMessage = 'Email không được để trống!';
+      return res.redirect('/profile');
+    }
+
+    // Kiểm tra xem email mới có bị trùng với tài khoản khác không
+    if (email.toLowerCase().trim() !== user.email) {
+      const existingEmail = await User.findOne({
+        email: email.toLowerCase().trim(),
+        _id: { $ne: user._id }
+      });
+      if (existingEmail) {
+        req.session.errorMessage = 'Địa chỉ Email này đã được người khác sử dụng!';
+        return res.redirect('/profile');
+      }
+      user.email = email.toLowerCase().trim();
+    }
+
+    user.fullName = fullName ? fullName.trim() : '';
+
+    // Nếu người dùng muốn đổi mật khẩu
+    if (newPassword || currentPassword) {
+      if (!currentPassword) {
+        req.session.errorMessage = 'Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu mới!';
+        return res.redirect('/profile');
+      }
+
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) {
+        req.session.errorMessage = 'Mật khẩu hiện tại không chính xác!';
+        return res.redirect('/profile');
+      }
+
+      if (newPassword.length < 6) {
+        req.session.errorMessage = 'Mật khẩu mới phải có ít nhất 6 ký tự!';
+        return res.redirect('/profile');
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        req.session.errorMessage = 'Xác nhận mật khẩu mới không khớp!';
+        return res.redirect('/profile');
+      }
+
+      user.password = newPassword; // pre-save hook sẽ tự động hash mật khẩu mới
+    }
+
+    await user.save();
+
+    // Cập nhật lại session
+    req.session.user.fullName = user.fullName || user.username;
+    req.session.user.email = user.email;
+
+    req.session.successMessage = 'Cập nhật thông tin tài khoản thành công!';
+    return res.redirect('/profile');
+  } catch (err) {
+    console.error('Update profile error:', err);
+    req.session.errorMessage = 'Có lỗi xảy ra khi cập nhật thông tin: ' + err.message;
+    return res.redirect('/profile');
+  }
+};

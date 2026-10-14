@@ -686,3 +686,32 @@ body {
     flex-direction: column;
   }
 }
+
+/* ---------------- Profile & Settings ---------------- */
+.form-section-title {
+  font-size: 17px;
+  color: var(--primary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 28px 0 20px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  margin-top: -8px;
+}
+
+.input-disabled {
+  background-color: #f1f3f4 !important;
+  color: #70757a !important;
+  cursor: not-allowed;
+}

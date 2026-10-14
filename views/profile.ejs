@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cài đặt tài khoản - Bin Shop</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Header / Navbar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <span class="logo">🛒</span>
+      <h2>Bin Shop Manager</h2>
+    </div>
+    <div class="nav-user">
+      <a href="/orders" class="btn btn-gray btn-sm">📋 Danh sách đơn</a>
+      <span class="user-info">
+        <strong><%= currentUser.fullName || currentUser.username %></strong>
+        <span class="badge <%= currentUser.role === 'admin' ? 'badge-admin' : 'badge-user' %>">
+          <%= currentUser.role %>
+        </span>
+      </span>
+      <a href="/logout" class="btn btn-outline-danger btn-sm">Đăng xuất</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="form-wrapper">
+      <div class="form-header">
+        <h1>⚙️ Cài Đặt Thông Tin Tài Khoản</h1>
+        <p>Cập nhật hồ sơ cá nhân và đổi mật khẩu</p>
+      </div>
+
+      <% if (successMessage) { %>
+        <div class="alert alert-success">
+          <span class="alert-icon">✓</span>
+          <span><%= successMessage %></span>
+        </div>
+      <% } %>
+
+      <% if (errorMessage) { %>
+        <div class="alert alert-danger">
+          <span class="alert-icon">⚠</span>
+          <span><%= errorMessage %></span>
+        </div>
+      <% } %>
+
+      <form class="card form-card" action="/profile" method="POST">
+        <!-- Thông tin cơ bản -->
+        <h3 class="form-section-title">👤 Thông Tin Cá Nhân</h3>
+
+        <div class="form-group">
+          <label for="username">Tên đăng nhập (Username)</label>
+          <input 
+            type="text" 
+            id="username" 
+            value="<%= user.username %>" 
+            disabled 
+            class="input-disabled"
+          >
+          <small class="form-hint">Tên đăng nhập là cố định và không thể thay đổi.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Vai trò (Role)</label>
+          <input 
+            type="text" 
+            id="role" 
+            value="<%= user.role.toUpperCase() %>" 
+            disabled 
+            class="input-disabled"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="fullName">Họ và tên</label>
+          <input 
+            type="text" 
+            id="fullName" 
+            name="fullName" 
+            placeholder="Nhập họ và tên của bạn" 
+            value="<%= user.fullName || '' %>"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">Địa chỉ Email <span class="required">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="Nhập email" 
+            value="<%= user.email %>" 
+            required
+          >
+        </div>
+
+        <!-- Đổi mật khẩu -->
+        <div class="section-divider"></div>
+        <h3 class="form-section-title">🔑 Đổi Mật Khẩu</h3>
+        <p class="section-subtitle">Để trống các ô bên dưới nếu bạn không có nhu cầu đổi mật khẩu.</p>
+
+        <div class="form-group">
+          <label for="currentPassword">Mật khẩu hiện tại</label>
+          <input 
+            type="password" 
+            id="currentPassword" 
+            name="currentPassword" 
+            placeholder="Nhập mật khẩu hiện tại để xác thực"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">Mật khẩu mới (Tối thiểu 6 ký tự)</label>
+          <input 
+            type="password" 
+            id="newPassword" 
+            name="newPassword" 
+            placeholder="Nhập mật khẩu mới" 
+            minlength="6"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
+          <input 
+            type="password" 
+            id="confirmNewPassword" 
+            name="confirmNewPassword" 
+            placeholder="Nhập lại mật khẩu mới" 
+            minlength="6"
+          >
+        </div>
+
+        <div class="form-btn-group">
+          <button type="submit" class="btn btn-blue btn-lg">💾 Lưu Cập Nhật</button>
+          <a href="/orders" class="btn btn-gray btn-lg">Quay Lại</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html>
