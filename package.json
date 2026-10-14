@@ -1,0 +1,24 @@
+{
+  "name": "bin_shop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "start": "node app.js",
+  "dev": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "ejs": "^7.0.1",
+    "express": "^5.3.0",
+    "method-override": "^3.0.0",
+    "mongoose": "^9.11.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

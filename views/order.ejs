@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Product Orders</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Product Orders</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Customer Name</th><th>Product Name</th><th>Quantity</th>
+        <th>Order Date</th><th>Total Price</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(o => { %>
+        <tr>
+          <td><%= o.customerName %></td>
+          <td><%= o.productName %></td>
+          <td><%= o.quantity %></td>
+          <td><%= o.orderDate.toLocaleDateString('en-US', { timeZone: 'UTC' }) %></td>
+          <td><%= o.totalPrice.toLocaleString('vi-VN') %> VND</td>
+          <td class="actions">
+            <a class="btn btn-blue" href="/orders/update/<%= o._id %>">Update</a>
+            <form action="/orders/delete/<%= o._id %>" method="POST"
+                  onsubmit="return confirm('Delete this order?')">
+              <button class="btn btn-orange">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!orders.length) { %>
+        <tr><td colspan="6" class="empty">No orders yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+  <div class="center"><a class="btn btn-blue btn-lg" href="/orders/create">Create New Order</a></div>
+</body>
+</html>

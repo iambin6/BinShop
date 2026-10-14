@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Create New Order</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Create New Order</h1>
+  <form class="card" action="/orders/create" method="POST">
+    <% if (error) { %><p class="error"><%= error %></p><% } %>
+
+    <label>Customer Name</label>
+    <input type="text" name="customerName" placeholder="Enter your name"
+           value="<%= old.customerName || '' %>" required>
+
+    <label>Product Name</label>
+    <input type="text" name="productName" list="products" placeholder="Enter product name"
+           value="<%= old.productName || '' %>" required>
+    <datalist id="products">
+      <% products.forEach(p => { %><option value="<%= p.productName %>"><% }) %>
+    </datalist>
+
+    <label>Quantity</label>
+    <input type="number" name="quantity" min="1" placeholder="Enter quantity"
+           value="<%= old.quantity || '' %>" required>
+
+    <label>Order Date</label>
+    <input type="date" name="orderDate" value="<%= old.orderDate || '' %>" required>
+
+    <button type="submit" class="btn btn-blue btn-block">Place Order</button>
+    <a href="/orders" class="btn btn-orange btn-block">Go Back</a>
+  </form>
+</body>
+</html>

@@ -1,0 +1,26 @@
+* { box-sizing: border-box; }
+body { font-family: Arial, sans-serif; background: #eef5fc; margin: 0; padding: 30px 20px; color: #222; }
+h1 { text-align: center; color: #1a73e8; }
+
+table { width: 100%; max-width: 900px; margin: 20px auto; border-collapse: collapse; background: #fff; }
+th { background: #1a73e8; color: #fff; text-align: left; padding: 14px 15px; }
+td { padding: 14px 15px; }
+tbody tr:nth-child(odd) { background: #e8ecef; }
+tbody tr:nth-child(even) { background: #fff; }
+td.empty { text-align: center; color: #777; }
+.actions { display: flex; gap: 8px; align-items: center; }
+.actions form { margin: 0; }
+
+.btn { display: inline-block; border: none; border-radius: 6px; padding: 8px 14px;
+       color: #fff; font-size: 14px; text-decoration: none; cursor: pointer; text-align: center; }
+.btn-blue { background: #1a73e8; }
+.btn-orange { background: #f0a500; }
+.btn-lg { padding: 14px 24px; font-size: 18px; font-weight: bold; }
+.btn-block { display: block; width: 100%; padding: 16px; font-size: 18px; font-weight: bold; margin-top: 14px; }
+.center { text-align: center; margin-top: 40px; }
+
+.card { background: #fff; max-width: 640px; margin: 30px auto; padding: 30px; border-radius: 12px; }
+.card label { display: block; margin: 16px 0 6px; font-weight: bold; font-size: 18px; color: #1a73e8; }
+.card input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+.card input:focus { outline: none; border-color: #1a73e8; }
+.error { background: #fdecea; color: #b71c1c; padding: 10px 14px; border-radius: 6px; }
